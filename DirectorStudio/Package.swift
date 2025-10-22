@@ -1,57 +1,47 @@
 // swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
     name: "DirectorStudio",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v13)
+        .iOS(.v15),
+        .macOS(.v12)
     ],
     products: [
         .library(
-            name: "DirectorStudio",
-            targets: ["DirectorStudio"]
+            name: "DirectorStudioKit",
+            targets: ["DirectorStudioKit"]
         ),
+        .executable(
+            name: "DirectorStudioApp",
+            targets: ["DirectorStudioApp"]
+        )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.6.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.0"),
     ],
     targets: [
-        .target(
-            name: "DirectorStudio",
-            dependencies: [],
-            path: ".",
-            sources: [
-                "Core/Telemetry.swift",
-                "Core/AIServiceProtocol.swift",
-                "Core/CoreTypeSnapshot.swift",
-                "Core/Logging.swift",
-                "Core/PipelineProtocols.swift",
-                "DataModels.swift",
-                "DirectorStudioCore.swift",
-                "MonetizationManager.swift",
-                "PersistenceManager.swift",
-                "SegmentationModule.swift",
-                "RewordingModule.swift",
-                "StoryAnalysisModule.swift",
-                "TaxonomyModule.swift",
-                "ContinuityModule.swift",
-                "VideoGenerationModule.swift",
-                "VideoAssemblyModule.swift",
-                "VideoEffectsModule.swift",
-                "SupportingTypes.swift",
-                "CoreGUIAbstraction.swift"
-            ]
+        // MARK: - App Target
+        .executableTarget(
+            name: "DirectorStudioApp",
+            dependencies: ["DirectorStudioKit"],
+            path: "App"
         ),
+
+        // MARK: - Main Library Target
+        .target(
+            name: "DirectorStudioKit",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+            path: "Modules"
+        ),
+
+        // MARK: - Test Target
         .testTarget(
             name: "DirectorStudioTests",
-            dependencies: ["DirectorStudio"],
-            path: "Tests",
-            sources: [
-                "DirectorStudioTests.swift"
-            ]
+            dependencies: ["DirectorStudioKit"],
+            path: "Tests"
         ),
     ]
 )

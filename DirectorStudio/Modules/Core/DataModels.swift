@@ -4,19 +4,19 @@ import Foundation
 public struct PromptSegment: Codable, Identifiable, Sendable {
     // BugScan: character DNA noop touch for analysis
     public let id = UUID()
-    let index: Int
-    let duration: Int // Target duration in seconds
-    var content: String
-    let characters: [String]
-    let setting: String
-    let action: String
-    let continuityNotes: String
-    var cinematicTags: CinematicTaxonomy?
+    public let index: Int
+    public let duration: Int // Target duration in seconds
+    public var content: String
+    public let characters: [String]
+    public let setting: String
+    public let action: String
+    public let continuityNotes: String
+    public var cinematicTags: CinematicTaxonomy?
     
     // New properties for continuity engine
-    let location: String
-    let props: [String]
-    let tone: String
+    public let location: String
+    public let props: [String]
+    public let tone: String
     
     public init(index: Int, duration: Int, content: String, characters: [String], setting: String, action: String, continuityNotes: String, location: String, props: [String], tone: String) {
         self.index = index
@@ -31,14 +31,14 @@ public struct PromptSegment: Codable, Identifiable, Sendable {
         self.tone = tone
     }
     
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case index, duration, content, characters, setting, action
         case continuityNotes = "continuity_notes"
         case location, props, tone
     }
     
     // Convert to SceneModel for continuity validation
-    func toSceneModel() -> SceneModel {
+    public func toSceneModel() -> SceneModel {
         return SceneModel(
             id: index,
             location: location,

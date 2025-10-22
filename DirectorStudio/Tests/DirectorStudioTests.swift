@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import DirectorStudio
+@testable import DirectorStudioKit
 
 final class DirectorStudioTests: XCTestCase {
     
@@ -15,6 +15,13 @@ final class DirectorStudioTests: XCTestCase {
     override func setUp() {
         super.setUp()
         core = DirectorStudioCore.shared
+        // Create a dummy project for testing
+        do {
+            let project = try core.createProject(name: "Test Project")
+            _ = try core.loadProject(id: project.id)
+        } catch {
+            XCTFail("Failed to set up test project: \(error)")
+        }
     }
     
     override func tearDown() {
