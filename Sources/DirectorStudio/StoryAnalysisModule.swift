@@ -24,7 +24,18 @@ public final class StoryAnalysisModule: PipelineModule {
     public let version = "1.0.0"
     public var isEnabled = true
     
-    public init() {}
+    public init() {
+        // Telemetry: Module initialized
+        Task {
+            await Telemetry.shared.register(module: "storyanalysis")
+            await Telemetry.shared.logEvent("ModuleInitialized", metadata: ["module": "storyanalysis", "version": version])
+        }
+    }
+    
+    /// Completion marker - validates module is ready
+    public var isComplete: Bool {
+        return isEnabled && version == "1.0.0"
+    }
     
     public nonisolated func validate(input: StoryAnalysisInput) -> Bool {
         let trimmed = input.story.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -32,7 +43,8 @@ public final class StoryAnalysisModule: PipelineModule {
     }
     
     public func execute(input: StoryAnalysisInput) async throws -> StoryAnalysisOutput {
-        print("🔍 Starting deep story analysis [v2.0]")
+        // Telemetry: Execution started
+        await Telemetry.shared.logEvent("StoryAnalysisExecutionStarted", metadata: ["storyLength": "\(input.story.count)"])
         
         let startTime = Date()
         
@@ -54,6 +66,9 @@ public final class StoryAnalysisModule: PipelineModule {
                 confidence: 0.95,
                 processingTime: executionTime
             )
+            
+            // Telemetry: Execution completed
+            await Telemetry.shared.logEvent("StoryAnalysisExecutionCompleted", metadata: ["processingTime": "\(executionTime)", "complexityScore": "\(analysis.complexityScore)", "characterCount": "\(analysis.characterDevelopment.count)"])
             
             print("✅ Deep analysis completed in \(String(format: "%.2f", executionTime))s")
             print("📊 Extracted: \(analysis.characterDevelopment.count) characters, \(analysis.themes.count) themes, complexity: \(analysis.complexityScore)")

@@ -48,6 +48,11 @@ public class DirectorStudioCore {
     // MARK: - Initialization
     
     private init() {
+        // Telemetry: Core initialization started
+        Task {
+            await Telemetry.shared.logEvent("CoreInitializationStarted", metadata: ["timestamp": ISO8601DateFormatter().string(from: Date())])
+        }
+        
         // Initialize AI service
         self.aiService = MockAIService()
         
@@ -66,8 +71,24 @@ public class DirectorStudioCore {
             self.persistenceManager = try FilePersistenceManager()
             self.monetizationManager = MockMonetizationManager(persistenceManager: persistenceManager)
         } catch {
+            // Telemetry: Core initialization failed
+            Task {
+                await Telemetry.shared.logEvent("CoreInitializationFailed", metadata: ["error": error.localizedDescription])
+            }
             fatalError("Failed to initialize core services: \(error.localizedDescription)")
         }
+        
+        // Telemetry: Core initialization completed
+        Task {
+            await Telemetry.shared.logEvent("CoreInitializationCompleted", metadata: ["moduleCount": "8"])
+        }
+    }
+    
+    // MARK: - Completion Status
+    
+    /// Returns true if core is properly initialized and ready
+    public var isComplete: Bool {
+        return !isProcessing && currentProject != nil
     }
     
     // MARK: - Project Management

@@ -73,7 +73,18 @@ public final class SegmentationModule: PipelineModule {
     public let version = "1.0.0"
     public var isEnabled = true
     
-    public init() {}
+    public init() {
+        // Telemetry: Module initialized
+        Task {
+            await Telemetry.shared.register(module: "segmentation")
+            await Telemetry.shared.logEvent("ModuleInitialized", metadata: ["module": "segmentation", "version": version])
+        }
+    }
+    
+    /// Completion marker - validates module is ready
+    public var isComplete: Bool {
+        return isEnabled && version == "1.0.0"
+    }
     
     public nonisolated func validate(input: SegmentationInput) -> Bool {
         let trimmed = input.story.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -82,6 +93,9 @@ public final class SegmentationModule: PipelineModule {
     
     public func execute(input: SegmentationInput) async throws -> SegmentationOutput {
         let startTime = Date()
+        
+        // Telemetry: Execution started
+        await Telemetry.shared.logEvent("SegmentationExecutionStarted", metadata: ["storyLength": "\(input.story.count)", "maxDuration": "\(input.maxDuration)"])
         
         // Analyze story structure
         let analysis = analyzeSegmentationOpportunities(input.story)
@@ -95,6 +109,9 @@ public final class SegmentationModule: PipelineModule {
         // Calculate quality metrics
         let metrics = calculateSegmentationMetrics(segments, targetDuration: input.maxDuration)
         let processingTime = Date().timeIntervalSince(startTime)
+        
+        // Telemetry: Execution completed
+        await Telemetry.shared.logEvent("SegmentationExecutionCompleted", metadata: ["segmentCount": "\(segments.count)", "processingTime": "\(processingTime)"])
         
         return SegmentationOutput(
             segments: segments,

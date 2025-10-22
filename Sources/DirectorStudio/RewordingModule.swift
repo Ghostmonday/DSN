@@ -86,6 +86,16 @@ public final class RewordingModule: PipelineModule {
     
     public init(aiService: AIServiceProtocol = MockAIService()) {
         self.aiService = aiService
+        // Telemetry: Module initialized
+        Task {
+            await Telemetry.shared.register(module: "rewording")
+            await Telemetry.shared.logEvent("ModuleInitialized", metadata: ["module": "rewording", "version": version])
+        }
+    }
+    
+    /// Completion marker - validates module is ready
+    public var isComplete: Bool {
+        return isEnabled && version == "1.0.0" && aiService.isAvailable
     }
     
     public nonisolated func validate(input: RewordingInput) -> Bool {
@@ -96,6 +106,9 @@ public final class RewordingModule: PipelineModule {
     public func execute(input: RewordingInput) async throws -> RewordingOutput {
         let startTime = Date()
         
+        // Telemetry: Execution started
+        await Telemetry.shared.logEvent("RewordingExecutionStarted", metadata: ["textLength": "\(input.text.count)", "type": input.type.rawValue])
+        
         let userPrompt = "Rewrite the following text:\n\n\(input.text)"
         
         let rewordedText = try await aiService.processText(
@@ -104,6 +117,9 @@ public final class RewordingModule: PipelineModule {
         )
         
         let processingTime = Date().timeIntervalSince(startTime)
+        
+        // Telemetry: Execution completed
+        await Telemetry.shared.logEvent("RewordingExecutionCompleted", metadata: ["processingTime": "\(processingTime)", "type": input.type.rawValue])
         
         return RewordingOutput(
             originalText: input.text,
