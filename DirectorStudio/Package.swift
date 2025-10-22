@@ -26,7 +26,10 @@ let package = Package(
             name: "DirectorStudioApp",
             dependencies: ["DirectorStudioKit"],
             path: "App",
-            resources: [.process("Resources/Info.plist")]),
+            resources: [
+                .process("Resources")
+            ]
+        ),
 
         // MARK: - Main Library Target
         .target(
